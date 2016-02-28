@@ -5,7 +5,7 @@ var request = require('request');
 var stringify = require('csv-stringify');
 var fs = require('fs');
 const csvWriter = require('csv-write-stream')
-const writer = csvWriter({ headers: ["Topic", "Subtopic", "AnswerKey", "Preview", "Region"]})
+const writer = csvWriter({ headers: ["Topic", "Subtopic", "AnswerKey", "Preview", "Answer", "Region"]})
 writer.pipe(fs.createWriteStream('out.csv'))
 
 // function buildFromPage(element){
@@ -54,9 +54,10 @@ request('http://www.legalline.ca/legal-answers/', function (error, response, bod
               var region = headerObject.find('.region').text()
               region = region.replace('Region: ', "")
               var text = $('body').find('.pf-content').text()
-              text = text.substring(0, 700)
+              var fullAnswer = text
+              var preview = text.substring(0, 700)
               var articleTopic = $('body').find('.sidebar').find('.parentTaxSidebar').html()
-              writer.write([articleTopic,title,artNum,text,region])
+              writer.write([articleTopic,title,artNum,preview, fullAnswer, region])
             })
           })
         }else if(artNum){
@@ -67,9 +68,10 @@ request('http://www.legalline.ca/legal-answers/', function (error, response, bod
           var region = headerObject.find('.region').text()
           region = region.replace('Region: ', "")
           var text = $('body').find('.pf-content').text()
-          text = text.substring(0, 700)
+          var fullAnswer = text
+          var preview = text.substring(0, 700)
           var articleTopic = $('body').find('.sidebar').find('.parentTaxSidebar').html()
-          writer.write([articleTopic,title,artNum,text,region])
+          writer.write([articleTopic,title,artNum,preview, fullAnswer, region])
         }else{
           $('body').find('.padded-container').find('.article-container').find('ul').find('li').each(function(index, element){
             var link = $(this).find('a')
@@ -81,8 +83,9 @@ request('http://www.legalline.ca/legal-answers/', function (error, response, bod
               var region = headerObject.find('.region').text()
               region = region.replace('Region: ', "")
               var text = $('body').find('.pf-content').text()
-              text = text.substring(0, 700)
-              writer.write([articleTopic,title,artNum,text,region])
+              var fullAnswer = text
+              var preview = text.substring(0, 700)
+              writer.write([articleTopic,title,artNum, preview, fullAnswer, region])
             })
           })
         }
