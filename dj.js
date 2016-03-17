@@ -38,10 +38,13 @@ for(var l = 0; l < provice_array.length - 1; l++){
 let j = request.jar()
 let cookie = request.cookie('province=' + provice_array[l])
 var url = 'http://www.legalline.ca/legal-answers/'
-j.setCookie(cookie)
+j.setCookie(`province=${provice_array[l]}; path=/; domain=www.legalline.ca`, `${url}`);
 request({url: url, jar: j}, function (error, response, body) {
   if (!error && response.statusCode == 200) {
     var $ = Cheerio.load(body);
+    if(body == null){
+      return false
+    }
     $('body').find('.article-container').find('li').each(function(index, element) {
       var topic = $(this).find('a').text();
       var url = $(this).find('a').attr('href');
@@ -49,9 +52,12 @@ request({url: url, jar: j}, function (error, response, body) {
       }else{
         url = "http://www.legalline.ca"  + url
       }
-      console.log("COOKIE IS:" + cookie)
-      console.log("URL IS:" + url)
       request({url: url, jar: j}, function(error, response, body){
+        var cookie_string = j.getCookieString(url)
+        console.log(cookie_string)
+        if(body == null){
+          return false
+        }
         var $ = Cheerio.load(body);
         var subCatSearch = $('body').find('.padded-container').find('h2').text()
         var artNum = $('body').find('.art-no').text()
@@ -92,6 +98,9 @@ request({url: url, jar: j}, function (error, response, body) {
           $('body').find('.padded-container').find('.article-container').find('ul').find('li').each(function(index, element){
             var link = $(this).find('a')
             request({url: "http://www.legalline.ca" + link, jar: j}, function(err, response, body){
+              if(body == null){
+                return false
+              }
               var $ = Cheerio.load(body)
               var headerObject = $('body').find('.articleHeader')
               var title = headerObject.find('h1').text()
