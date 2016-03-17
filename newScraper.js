@@ -4,8 +4,20 @@ var stringify = require('csv-stringify');
 var fs = require('fs');
 
 everything = []
-
-request('http://www.legalline.ca/legal-answers/', function (error, response, body) {
+var provice_array = ["British%20Columbia", "Alberta", "Mantioba", "Nova%20Scotia", "New%20Brunswick", "NL", "NWT", "Nunavut", "Ontario", "PEI", "Quebec", "Saskatchewan", "Yukon"]
+// var j = request.jar();
+// var cookie = request.cookie('province=BritishCol');
+// var url = 'http://www.google.com';
+// j.setCookie(cookie, url);
+// request({url: url, jar: j}, function () {
+//   request('http://images.google.com')
+// })
+for(var l = 0; l < provice_array.length; l++){
+  var j = request.jar()
+  var cookie = request.cookie('province=' + provice_array[l])
+  var url = 'http://www.legalline.ca/legal-answers/'
+  j.setCookie(cookie, url)
+request({url: url, jar: j}, function (error, response, body) {
   
   // var file_type = [];
   if (!error && response.statusCode == 200) {
@@ -74,11 +86,7 @@ request('http://www.legalline.ca/legal-answers/', function (error, response, bod
 
       }   
     });
-
-    // var arr_for_csv = two_d_array(topics, topics_url);
-    
-
-    
+    // var arr_for_csv = two_d_array(topics, topics_url); 
   }
-
 })
+}
