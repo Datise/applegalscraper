@@ -26,7 +26,10 @@ writer.pipe(fs.createWriteStream('out.csv'))
 //     writer.end()
 //   })
 // }
-request('http://www.legalline.ca/legal-answers/', function (error, response, body) {
+let cookie = request.cookie('province=Quebec');
+var jar = request.jar();
+jar.setCookie(cookie);
+request({method:'GET', jar:jar, url:'http://www.legalline.ca/legal-answers/'}, function (error, response, body) {
   if (!error && response.statusCode == 200) {
     var $ = Cheerio.load(body);
     $('body').find('.article-container').find('li').each(function(index, element) {
@@ -37,7 +40,7 @@ request('http://www.legalline.ca/legal-answers/', function (error, response, bod
       }else{
         url = "http://www.legalline.ca"  + url
       }
-      request(url, function(error, response, body){
+      request({method:'GET', jar:jar, url: url}, function(error, response, body){
         var $ = Cheerio.load(body);
         //console.log($('body'))
         var subCatSearch = $('body').find('.padded-container').find('h2').text()
@@ -45,7 +48,7 @@ request('http://www.legalline.ca/legal-answers/', function (error, response, bod
         if(subCatSearch){
           $('body').find('.article-container').find('.submenuPosts').find('li').each(function(index, element){ 
             var url = $(element).find('a').attr('href')
-            request(url, function(err, response, body){
+            request({method:'GET', jar:jar, url: url}, function(err, response, body){
               var $ = Cheerio.load(body)
               var headerObject = $('body').find('.articleHeader')
               var title = headerObject.find('h1').text()
@@ -75,7 +78,7 @@ request('http://www.legalline.ca/legal-answers/', function (error, response, bod
         }else{
           $('body').find('.padded-container').find('.article-container').find('ul').find('li').each(function(index, element){
             var link = $(this).find('a')
-            request("http://www.legalline.ca" + link, function(err, response, body){
+            request({method:'GET', jar:jar, url: "http://www.legalline.ca" + link}, function(err, response, body){
               var $ = Cheerio.load(body)
               var headerObject = $('body').find('.articleHeader')
               var title = headerObject.find('h1').text()
