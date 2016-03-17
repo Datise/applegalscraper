@@ -34,11 +34,11 @@ var provice_array = ["British%20Columbia", "Alberta", "Mantioba", "Nova%20Scotia
 // request({url: url, jar: j}, function () {
 //   request('http://images.google.com')
 // })
-for(var l = 0; l < provice_array.length; l++){
-var j = request.jar()
-var cookie = request.cookie('province=' + provice_array[l])
+for(var l = 0; l < provice_array.length - 1; l++){
+let j = request.jar()
+let cookie = request.cookie('province=' + provice_array[l])
 var url = 'http://www.legalline.ca/legal-answers/'
-j.setCookie(cookie, url)
+j.setCookie(cookie)
 request({url: url, jar: j}, function (error, response, body) {
   if (!error && response.statusCode == 200) {
     var $ = Cheerio.load(body);
@@ -46,19 +46,22 @@ request({url: url, jar: j}, function (error, response, body) {
       var topic = $(this).find('a').text();
       var url = $(this).find('a').attr('href');
       if(url.indexOf("http://www.legalline.ca") > -1){
-
       }else{
         url = "http://www.legalline.ca"  + url
       }
-      request(url, function(error, response, body){
+      console.log("COOKIE IS:" + cookie)
+      console.log("URL IS:" + url)
+      request({url: url, jar: j}, function(error, response, body){
         var $ = Cheerio.load(body);
-        //console.log($('body'))
         var subCatSearch = $('body').find('.padded-container').find('h2').text()
         var artNum = $('body').find('.art-no').text()
         if(subCatSearch){
           $('body').find('.article-container').find('.submenuPosts').find('li').each(function(index, element){ 
             var url = $(element).find('a').attr('href')
-            request(url, function(err, response, body){
+            request({url: url, jar: j}, function(err, response, body){
+              if(body == null){
+                return false
+              }
               var $ = Cheerio.load(body)
               var headerObject = $('body').find('.articleHeader')
               var title = headerObject.find('h1').text()
@@ -88,7 +91,7 @@ request({url: url, jar: j}, function (error, response, body) {
         }else{
           $('body').find('.padded-container').find('.article-container').find('ul').find('li').each(function(index, element){
             var link = $(this).find('a')
-            request("http://www.legalline.ca" + link, function(err, response, body){
+            request({url: "http://www.legalline.ca" + link, jar: j}, function(err, response, body){
               var $ = Cheerio.load(body)
               var headerObject = $('body').find('.articleHeader')
               var title = headerObject.find('h1').text()
